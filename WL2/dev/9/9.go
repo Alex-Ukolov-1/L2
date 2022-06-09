@@ -10,7 +10,7 @@ import (
 func main() {
 	glow, err := http.Get("https://yandex.ru/")
 	if err != nil {
-		log.Fatalf("error to get URL")
+		log.Fatalf("error")
 	}
 	defer glow.Body.Close()
 
