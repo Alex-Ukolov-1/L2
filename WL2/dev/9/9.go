@@ -8,11 +8,11 @@ import (
 )
 
 func main() {
-	response, err := http.Get("https://vk.com/id228187696")
+	glow, err := http.Get("https://yandex.ru/")
 	if err != nil {
 		log.Fatalf("error to get URL")
 	}
-	defer response.Body.Close()
+	defer glow.Body.Close()
 
 	output, err := os.Create("index.html")
 	defer output.Close()
