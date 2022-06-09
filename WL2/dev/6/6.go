@@ -4,99 +4,60 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
 )
 
 /*
-=== Утилита cut ===
-Принимает STDIN, разбивает по разделителю (TAB) на колонки, выводит запрошенные
-Поддержать флаги:
 -f - "fields" - выбрать поля (колонки)
 -d - "delimiter" - использовать другой разделитель
 -s - "separated" - только строки с разделителем
-Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
-func main() {
-
-	var f, d string
-	var s bool
-
-	// считываем ключи
-	flag.StringVar(&f, "f", "", "выбрать поля (колонки)")
-	flag.StringVar(&d, "d", " ", "использовать другой разделитель")
-	flag.BoolVar(&s, "s", false, "только строки с разделителем")
-
-	flag.Parse()
-
-	// инициализируем переменную, сохраняющую индексы нужных колонок
-	var cols []int
-	// если флаг f активирован
-	if f != "" {
-		// считываем номера нужных колонок
-		cols = convertStrToIntArr(f)
+func cut(fields string, delimiter string, separated bool) {
+	scanner := bufio.NewScanner(os.Stdin)
+	// Парсим столбцы, которые просят вывести
+	field := strings.Split(fields, ",")
+	var fieldsP []int
+	for _, v := range field {
+		strInt, err := strconv.Atoi(v)
+		if err != nil {
+			log.Fatalln("error fields input")
+		}
+		fieldsP = append(fieldsP, strInt)
 	}
 
-	// бесконечный цикл обработки входящих строк
+	// Бесконечный цикл для ввода текста
 	for {
-		fmt.Print("Введите строку: ")
-		// инициализируем переменную, хранящую полученную из STDIN строку
-		var str string
-		// инициализируем сканер STDIN
-		scanner := bufio.NewScanner(os.Stdin)
-		// ждем пока в STDIN не будет написана строка
-		if scanner.Scan() {
-			// считываем строку
-			str = scanner.Text()
+		ok := scanner.Scan()
+		if !ok && scanner.Err() == nil {
+			break
 		}
+		str := scanner.Text()
 
-		// делим полученную строку
-		words := strings.Split(str, d)
-
-		// если есть определенные нужные колонки (активирован ключ f), то выводим их содержимое
-		if len(cols) > 0 {
-			for _, col := range cols {
-				if col < len(words) {
-					fmt.Println(words[col])
-				}
+		if separated {
+			if !strings.Contains(str, delimiter) {
+				continue
 			}
 		}
-		// если ключ f не активен, выводим все полученные отрезки
-		for _, word := range words {
-			fmt.Println(word)
+
+		strD := strings.Split(str, delimiter)
+
+		for _, v := range fieldsP {
+			fmt.Print(strD[v], " ")
 		}
+		fmt.Println()
 	}
 }
 
-// convertStrToIntArr конвертирует текстовое представление числовых отрезков в численное
-// ("1-3 5 7-8" -> 1,2,3,5,7,8)
-func convertStrToIntArr(str string) []int {
-	// делим полученную строку на области
-	fields := strings.Split(str, " ")
+func main() {
 
-	// инициализируем переменную для вывода
-	var result []int
-	// обходим каждую область
-	for _, field := range fields {
-		// считываем промежутки
-		rangesStr := strings.Split(field, "-")
-		// инициализируем переменную хранящую промежутки
-		var ranges [2]int
-		// считываем промежутки
-		for i, s := range rangesStr {
-			ranges[i], _ = strconv.Atoi(s)
-		}
-		// если записана только одна граница промежутка (область - одно число),
-		// то копируем границу
-		if ranges[1] == 0 {
-			ranges[1] = ranges[0]
-		}
-		// записываем в возвращаемую переменную числа входящие в промежуток
-		for i := ranges[0]; i <= ranges[1]; i++ {
-			result = append(result, i)
-		}
-	}
-	return result
+	fields := flag.String("f", "0,2", "fields")
+	delimiter := flag.String("d", "\t", "delimiter")
+	separated := flag.Bool("s", true, "separated")
+
+	cut(*fields, *delimiter, *separated)
+
 }
