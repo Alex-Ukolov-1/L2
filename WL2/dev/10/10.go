@@ -28,7 +28,6 @@ func main() {
 		for {
 			reader := bufio.NewReader(os.Stdin)
 			text, err := reader.ReadString('\n')
-			// если потом закрыть, то закроется и соединение - cntl + D
 			if err == io.EOF {
 				conn.Close()
 			}

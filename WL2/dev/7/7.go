@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 	"time"
 )
 
@@ -22,23 +21,6 @@ func or(channels ...<-chan interface{}) <-chan interface{} {
 	return singleChan
 }
 
-// or2 реализация на reflect. reflect.Select проводит select над массивом типа reflect.SelectCase,
-// в котором находятся каналы. По закрытию одного из каналов закрывается и основной канал.
-func or2(channels ...<-chan interface{}) <-chan interface{} {
-	singleChan := make(chan interface{})
-	var sliceChan []reflect.SelectCase
-	for _, v := range channels {
-		slCh := reflect.SelectCase{
-			Dir:  reflect.SelectRecv,
-			Chan: reflect.ValueOf(v),
-		}
-		sliceChan = append(sliceChan, slCh)
-	}
-	reflect.Select(sliceChan)
-	close(singleChan)
-	return singleChan
-}
-
 func main() {
 
 	sig := func(after time.Duration) <-chan interface{} {
@@ -50,7 +32,7 @@ func main() {
 		return c
 	}
 	start := time.Now()
-	<-or2(
+	<-or(
 		sig(2*time.Hour),
 		sig(5*time.Minute),
 		sig(1*time.Second),
