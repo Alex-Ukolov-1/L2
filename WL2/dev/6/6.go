@@ -10,11 +10,6 @@ import (
 	"strings"
 )
 
-/*
--f - "fields" - выбрать поля (колонки)
--d - "delimiter" - использовать другой разделитель
--s - "separated" - только строки с разделителем
-*/
 
 func cut(fields string, delimiter string, separated bool) {
 	scanner := bufio.NewScanner(os.Stdin)
